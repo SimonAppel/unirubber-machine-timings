@@ -1,5 +1,7 @@
 ﻿using Avalonia;
 using System;
+using ReactiveUI;
+using Avalonia.ReactiveUI;
 
 namespace MasterMachine;
 
@@ -17,5 +19,6 @@ sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .LogToTrace();
+            .LogToTrace()
+            .UseReactiveUI();
 }

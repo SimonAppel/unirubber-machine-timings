@@ -15,6 +15,44 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Margin="0,0,0,25">
+            <TextBlock Text="Send pieces amount to slave N1" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
+            <StackPanel Orientation="Horizontal">
+                <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[1]}"/>
+                <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="1" Width="100" Height="40" />
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Margin="0,0,0,25">
+            <TextBlock Text="Send pieces amount to slave N2" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
+            <StackPanel Orientation="Horizontal">
+                <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[2]}"/>
+                <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="2" Width="100" Height="40" />
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Margin="0,0,0,25">
+            <TextBlock Text="Send pieces amount to slave N3" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
+            <StackPanel Orientation="Horizontal">
+                <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[3]}"/>
+                <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="3" Width="100" Height="40" />
+            </StackPanel>
+        </StackPanel>
+<!--
+        <TextBlock Text="Send pieces amount to slave N1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button Content="Initiate work on N1" Command="{Binding SendCommand}" Width="100" Height="40" />
+        
+        <TextBlock Text="Send pieces amount to slave N2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button Content="Initiate work N2" Width="100" Height="40" />
+
+        <TextBlock Text="Stop whole process" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button Content="Stop work" Width="100" Height="40" />
+
+        <TextBlock Text="Change OC" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button Content="Stop work" Width="100" Height="40" />
+-->
+
+        
+    </StackPanel>
+
     
 </Window>

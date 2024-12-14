@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
 using Fleck;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 public class WebSocketServerService
 {
     private readonly WebSocketServer server;
-    private readonly Dictionary<string, IWebSocketConnection> clients;
+    public readonly Dictionary<string, IWebSocketConnection> clients;
 
     public WebSocketServerService()
     {
@@ -37,12 +41,14 @@ public class WebSocketServerService
 
     private void OnSocketClose(IWebSocketConnection socket, string id)
     {
-        if (clients.ContainsKey(id))
+        if (!clients.ContainsKey(id))
         {
-            clients.Remove(id);
-            Console.WriteLine($"Client disconnected: {id}");
-            OnClientDisconnected?.Invoke(id);
+            return;
         }
+
+        clients.Remove(id);
+        Console.WriteLine($"Client disconnected: {id}");
+        OnClientDisconnected?.Invoke(id);
     }
 
     private void OnSocketMessage(IWebSocketConnection socket, string message, string id)
@@ -76,14 +82,24 @@ public class WebSocketServerService
         Console.WriteLine("WebSocket server stopped.");
     }
 
-    public void SendMessageAsync(string slaveId, string message)
+    public async Task SendMessageAsync(string slaveId, string message)
     {
-        if (clients.TryGetValue(slaveId, out var socket))
+        try
         {
-            socket.Send(message);
-            Console.WriteLine($"Message sent to {slaveId}: {message}");
+            if (clients.TryGetValue(slaveId, out var socket))
+            {
+                await socket.Send(message);
+                Console.WriteLine($"Message sent to {slaveId}: {message}");
+            }
+            else
+            {
+                Console.WriteLine($"Client {slaveId} not found.");
+            }
         }
-        Console.WriteLine($"Client {slaveId} not found.");
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending message: {ex.Message}");
+        }
     }
 
     public event Action<string>? OnClientConnected;
