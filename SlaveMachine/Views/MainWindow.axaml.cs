@@ -7,7 +7,6 @@ namespace SlaveMachine.Views;
 
 public partial class MainWindow : Window
 {
-
     private readonly Timer timer;
 
     public MainWindow()
