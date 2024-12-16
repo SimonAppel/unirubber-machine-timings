@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using ReactiveUI;
+using SlaveMachine.Views.BusyView;
+using SlaveMachine.Views.IdleView;
 
 namespace SlaveMachine.ViewModels;
 
-enum SLAVE_STATE {
+enum SLAVE_STATE
+{
     IDLE = 0,
     BUSY = 1,
     ENDED = 3,
@@ -25,18 +29,31 @@ public partial class MainWindowViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref pieceCount, value);
     }
 
-    public ReactiveCommand<Unit, Unit> ButtonClickCommand { get; }
+    public UserControl currentView;
+    public BusyWindow busyWindow;
+    public IdleWindow idleWindow;
+
+    public UserControl CurrentView
+    {
+        get => currentView;
+        set => this.RaiseAndSetIfChanged(ref currentView, value);
+    }
 
     public MainWindowViewModel()
     {
         webSocketService = new WebSocketService("1");
-        webSocketService.MessageReceived += OnMessageReceived;
-        _ = webSocketService.ConnectAsync("ws://127.0.0.1:8181");
 
-        ButtonClickCommand = ReactiveCommand.Create(() =>
-        {
-            Console.WriteLine("Button clicked!");
-        });
+        // Passing down these objects it's an anti-pattern. Should just do a Dependency Injection with it.
+        // It's basically the same as this, but as a shared object for holding many data in case of anything.
+        // Read DI or Event Aggregator or Mediator Service or Shared View Model
+        idleWindow = new(webSocketService);
+        busyWindow = new();
+
+        currentView = busyWindow;
+        //currentView = idleWindow;
+
+        _ = webSocketService.ConnectAsync("ws://127.0.0.1:8181");
+        webSocketService.MessageReceived += OnMessageReceived;
     }
 
     // Read docs about this v.
@@ -48,11 +65,13 @@ public partial class MainWindowViewModel : ReactiveObject
         switch (splitMessage[0])
         {
             case "INIT":
-                if(PieceCount == -1){
+                if (PieceCount == -1)
+                {
                     PieceCount = Int32.Parse(splitMessage[1]);
                 }
                 Console.WriteLine($"Slave should initiate with {splitMessage[1]} pieces");
-            break;
+                CurrentView = busyWindow;
+                break;
 
             default:
                 return;
@@ -60,8 +79,8 @@ public partial class MainWindowViewModel : ReactiveObject
 
     }
 
-
-    public void TestCommand(){
+    public void TestCommand()
+    {
         Console.WriteLine("TEST COMMAND.");
     }
 }

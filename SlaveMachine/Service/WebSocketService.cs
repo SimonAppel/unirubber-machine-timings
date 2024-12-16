@@ -3,19 +3,34 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Tmds.DBus.Protocol;
 
 // Error handling in web sockets...
 
 public class WebSocketService
 {
+    private CancellationTokenSource cts;
+    private CancellationToken token;
+
     public string slaveId;
     private ClientWebSocket? webSocket;
     public event Action<string>? MessageReceived;
-    
-    public WebSocketService(string slaveId)
+    public event Action? OnClientConnected;
+    public event Action? OnClientDisconnected;
+
+    public WebSocketService(string slaveId, bool isEventOnly = false)
     {
-        Console.WriteLine($"Slave ID is {slaveId}");
-        this.slaveId = slaveId;
+        if (!isEventOnly)
+        {
+            Console.WriteLine($"Slave ID is {slaveId}");
+            this.slaveId = slaveId;
+            webSocket = new ClientWebSocket();
+        }
+    }
+
+    private void GenerateToken(){
+        cts = new CancellationTokenSource();
+        token = cts.Token;
     }
 
     public async Task DisconnectAsync()
@@ -26,8 +41,8 @@ public class WebSocketService
         }
 
         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+        OnClientDisconnected?.Invoke();
         webSocket.Dispose();
-        webSocket = null;
     }
 
     private async Task ReceiveMessages()
@@ -54,13 +69,30 @@ public class WebSocketService
         }
     }
 
+    // This is why we need a handler. The service provides the basis of working and the handler, the logic.
+    private async Task DoHeartbeat()
+    {
+        string heartbeatString = "HB";
+
+        while (!token.IsCancellationRequested)
+        {
+            _ = SendMessageAsync(heartbeatString);
+            await Task.Delay(10000, token);     // 10 secs o cada minuto?
+        }
+    }
+
+    // See how to make things retry the connection in case the server is down.
     public async Task ConnectAsync(string uri)
     {
         Console.WriteLine($"{uri}?slaveId={slaveId}");
-        webSocket = new ClientWebSocket();
 
-        await webSocket.ConnectAsync(new Uri($"{uri}?slaveId={slaveId}"), CancellationToken.None);
-        await Task.Run(ReceiveMessages);
+        await webSocket.ConnectAsync(new Uri($"{uri}?slaveId={slaveId}"), token);
+        GenerateToken();
+
+        OnClientConnected?.Invoke();
+
+        await Task.Run(DoHeartbeat, token);
+        await Task.Run(ReceiveMessages, token);
     }
 
     public async Task SendMessageAsync(string message)
@@ -70,8 +102,24 @@ public class WebSocketService
             throw new InvalidOperationException("WebSocket is not connected.");
         }
 
-        Console.WriteLine($"Sending message with content: ${message}");
-        var messageBytes = Encoding.UTF8.GetBytes(message);
-        await webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+        try
+        {
+            Console.WriteLine($"Sending message with content: ${message}");
+            var messageBytes = Encoding.UTF8.GetBytes(message);
+            await webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+        catch (Exception)
+        {
+            if (message.Equals("HB"))
+            {
+                Console.WriteLine("Heartbeat stop beating");
+                cts.Cancel();
+                await DisconnectAsync();
+            }
+            else
+            {
+                throw new ConnectException("Socket server is not online");
+            }
+        }
     }
 }
