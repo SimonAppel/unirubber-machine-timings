@@ -14,7 +14,7 @@ enum SLAVE_STATE
     IDLE = 0,
     BUSY = 1,
     ENDED = 3,
-    RECOVER = 4
+    RECOVER = 4,
 }
 
 public partial class MainWindowViewModel : ReactiveObject
@@ -49,8 +49,7 @@ public partial class MainWindowViewModel : ReactiveObject
         idleWindow = new(webSocketService);
         busyWindow = new();
 
-        currentView = busyWindow;
-        //currentView = idleWindow;
+        currentView = idleWindow;
 
         _ = webSocketService.ConnectAsync("ws://127.0.0.1:8181");
         webSocketService.MessageReceived += OnMessageReceived;
@@ -70,13 +69,16 @@ public partial class MainWindowViewModel : ReactiveObject
                     PieceCount = Int32.Parse(splitMessage[1]);
                 }
                 Console.WriteLine($"Slave should initiate with {splitMessage[1]} pieces");
+
+                busyWindow.SetPiecesAmount(PieceCount);
                 CurrentView = busyWindow;
+                busyWindow.StartTimers();
+
                 break;
 
             default:
                 return;
         }
-
     }
 
     public void TestCommand()

@@ -31,4 +31,14 @@ public partial class BusyWindow : UserControl
             ClockTextBlock.Text = DateTime.Now.ToString("HH:mm:ss");
         });
     }
+
+    public void StartTimers()
+    {
+        viewModel.SwHandler.StartWork();
+    }
+
+    public void SetPiecesAmount(int pieces)
+    {
+        viewModel.SetPiecesAmount(pieces);
+    }
 }

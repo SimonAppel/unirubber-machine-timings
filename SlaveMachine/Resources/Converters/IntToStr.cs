@@ -4,12 +4,11 @@ using Avalonia.Data.Converters;
 
 namespace SlaveMachine.Resources.Converters;
 
-public class BoolOnOffLine : IValueConverter
+public class IntToStr : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        Console.WriteLine(parameter);
-        return (bool)value ? "ONLINE" : "OFFLINE";
+        return $"{value}";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

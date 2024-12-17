@@ -4,8 +4,7 @@ using System.Timers;
 public class StopwatchService
 {
     private readonly Timer timer;
-    private TimeSpan elapsedTime;
-    private string formattedTime;
+    public TimeSpan elapsedTime;
     public bool IsRunning { get; private set; }
 
     public event Action<TimeSpan>? OnClockTick;
@@ -13,7 +12,6 @@ public class StopwatchService
     public StopwatchService()
     {
         elapsedTime = TimeSpan.Zero;
-        formattedTime = "00:00:00";
         timer = new Timer(1000);
         timer.Elapsed += OnTimerTick;
     }

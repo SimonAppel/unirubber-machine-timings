@@ -8,50 +8,38 @@ namespace SlaveMachine.ViewModels.Busy;
 
 public partial class BusyViewModel : ReactiveObject
 {
-    private StopwatchService initWorkWatch;
-    private StopwatchService pieceWatch;
+    // El colocar {get; set;} permite su uso en bindings en UI
+    public StopwatchHandler SwHandler { get; }
+    public ReactiveCommand<Unit, Unit> NewTimer { get; }
 
-    private string diffInitWorkTime;
-    private string diffPieceTime;
+    private int remainingPieces;
+    public string testing;
 
-    public string DiffInitWorkTime
+    public int RemainingPieces
     {
-        get => diffInitWorkTime;
-        set => this.RaiseAndSetIfChanged(ref diffInitWorkTime, value);
-    }
-    public string DiffPieceTime
-    {
-        get => diffPieceTime;
-        set => this.RaiseAndSetIfChanged(ref diffPieceTime, value);
+        get => remainingPieces;
+        set => this.RaiseAndSetIfChanged(ref remainingPieces, value);
     }
 
     public BusyViewModel()
     {
-        diffInitWorkTime = "00:00:00";
-        diffPieceTime = "00:00:00";
+        remainingPieces = 0;
+        SwHandler = new StopwatchHandler();
 
-        initWorkWatch = new StopwatchService();
-        pieceWatch = new StopwatchService();
-
-        initWorkWatch.OnClockTick += OnInitWorkChange;
-        pieceWatch.OnClockTick += OnPieceWorkChange;
-
-        initWorkWatch.StartStop();
-        pieceWatch.StartStop();
+        NewTimer = ReactiveCommand.Create(NewPieceTimer);
     }
 
-    private void OnInitWorkChange(TimeSpan ts)
+    private void NewPieceTimer()
     {
-        DiffInitWorkTime = ts.ToString(@"hh\:mm\:ss");
-    }
-    private void OnPieceWorkChange(TimeSpan ts)
-    {
-        DiffPieceTime = ts.ToString(@"hh\:mm\:ss");
+        SwHandler.NewPieceTimer();
+        if (RemainingPieces > 0)
+        {
+            RemainingPieces--;
+        }
     }
 
-    public void StartWork()
+    public void SetPiecesAmount(int pieces)
     {
-        initWorkWatch.StartStop();
-        pieceWatch.StartStop();
+        RemainingPieces = pieces;
     }
 }

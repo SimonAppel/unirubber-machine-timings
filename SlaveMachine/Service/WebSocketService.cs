@@ -28,7 +28,8 @@ public class WebSocketService
         }
     }
 
-    private void GenerateToken(){
+    private void GenerateToken()
+    {
         cts = new CancellationTokenSource();
         token = cts.Token;
     }
@@ -40,7 +41,11 @@ public class WebSocketService
             throw new InvalidOperationException("WebSocket is not connected.");
         }
 
-        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+        await webSocket.CloseAsync(
+            WebSocketCloseStatus.NormalClosure,
+            "Closing",
+            CancellationToken.None
+        );
         OnClientDisconnected?.Invoke();
         webSocket.Dispose();
     }
@@ -56,7 +61,10 @@ public class WebSocketService
         var buffer = new byte[1024];
         while (webSocket.State == WebSocketState.Open)
         {
-            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            var result = await webSocket.ReceiveAsync(
+                new ArraySegment<byte>(buffer),
+                CancellationToken.None
+            );
             if (result.MessageType == WebSocketMessageType.Close)
             {
                 await DisconnectAsync();
@@ -77,7 +85,7 @@ public class WebSocketService
         while (!token.IsCancellationRequested)
         {
             _ = SendMessageAsync(heartbeatString);
-            await Task.Delay(10000, token);     // 10 secs o cada minuto?
+            await Task.Delay(10000, token); // 10 secs o cada minuto?
         }
     }
 
@@ -85,14 +93,12 @@ public class WebSocketService
     public async Task ConnectAsync(string uri)
     {
         Console.WriteLine($"{uri}?slaveId={slaveId}");
-
         await webSocket.ConnectAsync(new Uri($"{uri}?slaveId={slaveId}"), token);
-        GenerateToken();
 
+        GenerateToken();
         OnClientConnected?.Invoke();
 
-        await Task.Run(DoHeartbeat, token);
-        await Task.Run(ReceiveMessages, token);
+        await Task.WhenAll(Task.Run(DoHeartbeat, token), Task.Run(ReceiveMessages, token));
     }
 
     public async Task SendMessageAsync(string message)
@@ -106,7 +112,12 @@ public class WebSocketService
         {
             Console.WriteLine($"Sending message with content: ${message}");
             var messageBytes = Encoding.UTF8.GetBytes(message);
-            await webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            await webSocket.SendAsync(
+                new ArraySegment<byte>(messageBytes),
+                WebSocketMessageType.Text,
+                true,
+                CancellationToken.None
+            );
         }
         catch (Exception)
         {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Fleck;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Fleck;
 
 public class WebSocketServerService
 {
@@ -21,10 +21,12 @@ public class WebSocketServerService
     private string GetSlaveIdFromUri(string rawUri)
     {
         var query = rawUri.Split('?');
-        if (query.Length < 1) throw new InvalidOperationException("Client does not provide arguments");
+        if (query.Length < 1)
+            throw new InvalidOperationException("Client does not provide arguments");
 
         var parameters = System.Web.HttpUtility.ParseQueryString(query[1]);
-        if (parameters["slaveId"] == null) throw new InvalidOperationException("Client does not provide ID");
+        if (parameters["slaveId"] == null)
+            throw new InvalidOperationException("Client does not provide ID");
 
         return parameters["slaveId"];
     }

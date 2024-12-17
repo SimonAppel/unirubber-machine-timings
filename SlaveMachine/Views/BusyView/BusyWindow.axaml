@@ -7,11 +7,16 @@
         xmlns:local="clr-namespace:SlaveMachine.ViewModels.Busy"
         x:Class="SlaveMachine.Views.BusyView.BusyWindow"
         x:DataType="local:BusyViewModel"
-        Background="#EBEBEB">
+        Background="#EBEBEB"
+        xmlns:conv="using:SlaveMachine.Resources.Converters">
 
     <Design.DataContext>
         <vm:IdleViewModel/>
     </Design.DataContext>
+
+    <UserControl.Resources>
+        <conv:IntToStr x:Key="IntToStr" />
+    </UserControl.Resources>
 
     <StackPanel Orientation="Horizontal" Margin="15">
          <Border Background="#FFFFFF" CornerRadius="10" BoxShadow="5 5 10 0 DarkGray" Padding="10" Margin="40">
@@ -23,11 +28,11 @@
                 </StackPanel>
                 <StackPanel Margin="0,0,0,20">
                     <TextBlock Text="Momento de Inicio" FontSize="40" FontWeight="SemiBold" Margin="10,0,0,5"/>
-                    <TextBlock Text="{Binding DiffInitWorkTime}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="50"/>
+                    <TextBlock Text="{Binding SwHandler.DiffInitWorkTime}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="50"/>
                 </StackPanel>
                 <StackPanel Margin="0,0,0,20">
                     <TextBlock Text="Tiempo de la pieza" FontSize="40" FontWeight="SemiBold" Margin="10,0,0,5"/>
-                    <TextBlock Text="{Binding DiffPieceTime}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="50"/>
+                    <TextBlock Text="{Binding SwHandler.DiffPieceTime}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="50"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -37,13 +42,13 @@
             <Border Background="#FFFFFF" CornerRadius="10" BoxShadow="5 5 10 0 DarkGray" Padding="10" Margin="40" Height="230">
                 <StackPanel Background="#FFFFFF" Width="500">
                     <TextBlock Text="Piezas Restantes" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="55" FontWeight="SemiBold" Margin="0,0,0,20"/>
-                    <TextBlock Text="100" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="100" Margin="0,0,0,20"/>
+                    <TextBlock Text="{Binding RemainingPieces, Converter={StaticResource IntToStr}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="100" Margin="0,0,0,20"/>
                 </StackPanel>
             </Border>
             <Border Background="#FFFFFF" CornerRadius="10" BoxShadow="5 5 10 0 DarkGray" Padding="10" Margin="40" Height="290">
                 <StackPanel Background="#FFFFFF" Width="500">
                     <Button Content="Iniciar Proceso" Width="100" Height="40" />
-                    <Button Content="Nueva Pieza" Width="100" Height="40" />
+                    <Button Content="Nueva Pieza" Command="{Binding NewTimer}" Width="100" Height="40" />
                     <Button Content="Detener Proceso" Width="100" Height="40" />
                 </StackPanel>
             </Border>
