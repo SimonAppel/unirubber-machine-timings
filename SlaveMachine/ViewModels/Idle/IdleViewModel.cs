@@ -8,7 +8,6 @@ namespace SlaveMachine.ViewModels.Idle;
 
 public partial class IdleViewModel : ReactiveObject
 {
-
     private bool isSlaveConnected;
     public bool IsSlaveConnected
     {
@@ -18,8 +17,6 @@ public partial class IdleViewModel : ReactiveObject
 
     public IdleViewModel(WebSocketService socket)
     {
-        Console.WriteLine("Idle View just started");
-
         socket.OnClientConnected += OnSlaveConnection;
         socket.OnClientDisconnected += OnSlaveDisconnection;
     }
@@ -29,6 +26,7 @@ public partial class IdleViewModel : ReactiveObject
         Console.WriteLine("Slave just connected");
         IsSlaveConnected = true;
     }
+
     private void OnSlaveDisconnection()
     {
         Console.WriteLine("Slave just disconnected");

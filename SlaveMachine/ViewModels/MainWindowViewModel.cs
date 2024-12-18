@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -19,7 +20,7 @@ enum SLAVE_STATE
 
 public partial class MainWindowViewModel : ReactiveObject
 {
-    private readonly WebSocketService webSocketService;
+    private readonly WebSocketHandler webSocket;
     private int pieceCount = -1;
     private SLAVE_STATE machineState = SLAVE_STATE.IDLE;
 
@@ -41,18 +42,18 @@ public partial class MainWindowViewModel : ReactiveObject
 
     public MainWindowViewModel()
     {
-        webSocketService = new WebSocketService("1");
+        webSocket = new WebSocketHandler();
 
         // Passing down these objects it's an anti-pattern. Should just do a Dependency Injection with it.
         // It's basically the same as this, but as a shared object for holding many data in case of anything.
         // Read DI or Event Aggregator or Mediator Service or Shared View Model
-        idleWindow = new(webSocketService);
+        idleWindow = new(webSocket.wsService);
         busyWindow = new();
 
         currentView = idleWindow;
 
-        _ = webSocketService.ConnectAsync("ws://127.0.0.1:8181");
-        webSocketService.MessageReceived += OnMessageReceived;
+        _ = webSocket.ConnectAsync();
+        webSocket.wsService.MessageReceived += OnMessageReceived;
     }
 
     // Read docs about this v.

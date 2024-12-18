@@ -9,128 +9,94 @@ using Tmds.DBus.Protocol;
 
 public class WebSocketService
 {
-    private CancellationTokenSource cts;
-    private CancellationToken token;
-
     public string slaveId;
-    private ClientWebSocket? webSocket;
+    public string wsServerAddr;
+    public ClientWebSocket webSocket;
     public event Action<string>? MessageReceived;
     public event Action? OnClientConnected;
     public event Action? OnClientDisconnected;
 
-    public WebSocketService(string slaveId, bool isEventOnly = false)
+    public WebSocketService()
     {
-        if (!isEventOnly)
-        {
-            Console.WriteLine($"Slave ID is {slaveId}");
-            this.slaveId = slaveId;
-            webSocket = new ClientWebSocket();
-        }
+        this.slaveId = "1"; //Environment.GetEnvironmentVariable("UNIRUBBER_MACHINE_ID");
+        this.wsServerAddr = "ws://127.0.0.1:8181"; //Environment.GetEnvironmentVariable("UNIRUBBER_MASTER_ADDRESS"); // "ws://127.0.0.1:8181"
+
+        Console.WriteLine($"Slave ID is {slaveId}");
+        Console.WriteLine($"WebSocket Server is {wsServerAddr}");
+
+        webSocket = new ClientWebSocket();
     }
 
-    private void GenerateToken()
+    public async Task ReceiveMessages()
     {
-        cts = new CancellationTokenSource();
-        token = cts.Token;
-    }
-
-    public async Task DisconnectAsync()
-    {
-        if (webSocket == null || webSocket.State != WebSocketState.Open)
-        {
-            throw new InvalidOperationException("WebSocket is not connected.");
-        }
-
-        await webSocket.CloseAsync(
-            WebSocketCloseStatus.NormalClosure,
-            "Closing",
-            CancellationToken.None
-        );
-        OnClientDisconnected?.Invoke();
-        webSocket.Dispose();
-    }
-
-    private async Task ReceiveMessages()
-    {
-        if (webSocket == null || webSocket.State != WebSocketState.Open)
+        if (webSocket == null)
         {
             throw new InvalidOperationException("WebSocket is not connected.");
         }
 
         Console.WriteLine("Message is received.");
-        var buffer = new byte[1024];
+
+        byte[] buffer = new byte[1024];
         while (webSocket.State == WebSocketState.Open)
         {
             var result = await webSocket.ReceiveAsync(
                 new ArraySegment<byte>(buffer),
                 CancellationToken.None
             );
-            if (result.MessageType == WebSocketMessageType.Close)
-            {
-                await DisconnectAsync();
-            }
-            else
-            {
-                var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                MessageReceived?.Invoke(message);
-            }
+
+            string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            MessageReceived?.Invoke(message);
         }
     }
 
-    // This is why we need a handler. The service provides the basis of working and the handler, the logic.
-    private async Task DoHeartbeat()
+    public async Task ConnectAsync()
     {
-        string heartbeatString = "HB";
-
-        while (!token.IsCancellationRequested)
-        {
-            _ = SendMessageAsync(heartbeatString);
-            await Task.Delay(10000, token); // 10 secs o cada minuto?
-        }
-    }
-
-    // See how to make things retry the connection in case the server is down.
-    public async Task ConnectAsync(string uri)
-    {
-        Console.WriteLine($"{uri}?slaveId={slaveId}");
-        await webSocket.ConnectAsync(new Uri($"{uri}?slaveId={slaveId}"), token);
-
-        GenerateToken();
-        OnClientConnected?.Invoke();
-
-        await Task.WhenAll(Task.Run(DoHeartbeat, token), Task.Run(ReceiveMessages, token));
-    }
-
-    public async Task SendMessageAsync(string message)
-    {
-        if (webSocket == null || webSocket.State != WebSocketState.Open)
+        if (webSocket == null)
         {
             throw new InvalidOperationException("WebSocket is not connected.");
         }
 
         try
         {
-            Console.WriteLine($"Sending message with content: ${message}");
-            var messageBytes = Encoding.UTF8.GetBytes(message);
-            await webSocket.SendAsync(
-                new ArraySegment<byte>(messageBytes),
-                WebSocketMessageType.Text,
-                true,
+            Console.WriteLine($"{wsServerAddr}?slaveId={slaveId}");
+
+            await webSocket.ConnectAsync(
+                new Uri($"{wsServerAddr}?slaveId={slaveId}"),
                 CancellationToken.None
             );
+            OnClientConnected?.Invoke();
         }
-        catch (Exception)
+        catch (WebSocketException se)
         {
-            if (message.Equals("HB"))
-            {
-                Console.WriteLine("Heartbeat stop beating");
-                cts.Cancel();
-                await DisconnectAsync();
-            }
-            else
-            {
-                throw new ConnectException("Socket server is not online");
-            }
+            Console.WriteLine($"WebSocket Service had the following error: {se.Message}");
+            OnClientDisconnected?.Invoke();
+            throw;
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(
+                $"WebSocket Service had the following non-socket-related error: {e.Message}"
+            );
+
+            OnClientDisconnected?.Invoke();
+            throw;
+        }
+    }
+
+    public async Task SendMessageAsync(string message)
+    {
+        if (webSocket == null)
+        {
+            throw new InvalidOperationException("WebSocket is not connected.");
+        }
+
+        Console.WriteLine($"Sending message with content: ${message}");
+        var messageBytes = Encoding.UTF8.GetBytes(message);
+        await webSocket.SendAsync(
+            new ArraySegment<byte>(messageBytes),
+            WebSocketMessageType.Text,
+            true,
+            CancellationToken.None
+        );
     }
 }

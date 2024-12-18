@@ -13,6 +13,7 @@ public class StopwatchService
     {
         elapsedTime = TimeSpan.Zero;
         timer = new Timer(1000);
+
         timer.Elapsed += OnTimerTick;
     }
 
