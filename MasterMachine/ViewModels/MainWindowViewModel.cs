@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using ReactiveUI;
+using SharpHook;
 using Tmds.DBus.Protocol;
 
 namespace MasterMachine.ViewModels;
@@ -38,6 +39,15 @@ public partial class MainWindowViewModel : ReactiveObject
 
     public MainWindowViewModel()
     {
+        var hook = new SimpleGlobalHook();
+
+        hook.KeyPressed += (sender, e) =>
+        {
+            Console.WriteLine($"Key Pressed: {e.Data.KeyCode}");
+        };
+
+        hook.RunAsync();
+
         Messages = [];
 
         webSocketService = new WebSocketServerService();

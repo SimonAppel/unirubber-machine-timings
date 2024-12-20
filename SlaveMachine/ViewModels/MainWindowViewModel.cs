@@ -58,7 +58,6 @@ public partial class MainWindowViewModel : ReactiveObject
         webSocket.wsService.MessageReceived += OnMessageReceived;
     }
 
-    // Read docs about this v.
     private void OnMessageReceived(string message)
     {
         Console.WriteLine($"Recieved: {message}");
