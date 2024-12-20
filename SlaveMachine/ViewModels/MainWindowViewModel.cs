@@ -33,6 +33,7 @@ public partial class MainWindowViewModel : ReactiveObject
     public UserControl currentView;
     public BusyWindow busyWindow;
     public IdleWindow idleWindow;
+    public PopupHandler ModalHandler { get; }
 
     public UserControl CurrentView
     {
@@ -43,16 +44,17 @@ public partial class MainWindowViewModel : ReactiveObject
     public MainWindowViewModel()
     {
         webSocket = new WebSocketHandler();
+        ModalHandler = new PopupHandler(webSocket.wsService);
 
         // Passing down these objects it's an anti-pattern. Should just do a Dependency Injection with it.
         // It's basically the same as this, but as a shared object for holding many data in case of anything.
         // Read DI or Event Aggregator or Mediator Service or Shared View Model
-        idleWindow = new(webSocket.wsService);
+        idleWindow = new(webSocket);
         busyWindow = new();
 
         currentView = idleWindow;
-
         _ = webSocket.ConnectAsync();
+
         webSocket.wsService.MessageReceived += OnMessageReceived;
     }
 
@@ -80,10 +82,5 @@ public partial class MainWindowViewModel : ReactiveObject
             default:
                 return;
         }
-    }
-
-    public void TestCommand()
-    {
-        Console.WriteLine("TEST COMMAND.");
     }
 }

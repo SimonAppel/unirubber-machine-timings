@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SlaveMachine.ViewModels.Idle;
 using Tmds.DBus.Protocol;
 
 public class WebSocketHandler
@@ -12,6 +13,8 @@ public class WebSocketHandler
     private CancellationToken token;
 
     public int maxRetry;
+
+    public event Action? OnClientEndRetry;
 
     public WebSocketHandler()
     {
@@ -75,7 +78,7 @@ public class WebSocketHandler
             try
             {
                 Console.WriteLine($"Connecting attempt Nº{retry}");
-                await wsService.ConnectAsync();
+                await wsService.ConnectAsync(retry);
             }
             catch (WebSocketException)
             {
@@ -98,6 +101,8 @@ public class WebSocketHandler
         if (wsService.webSocket.State != WebSocketState.Open)
         {
             Console.WriteLine("Client cannot find the server");
+            OnClientEndRetry?.Invoke();
+
             throw new Exception("Client cannot find the server");
         }
 

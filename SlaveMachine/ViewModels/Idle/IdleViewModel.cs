@@ -1,35 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reactive;
-using System.Threading.Tasks;
 using ReactiveUI;
 
 namespace SlaveMachine.ViewModels.Idle;
 
 public partial class IdleViewModel : ReactiveObject
 {
-    private bool isSlaveConnected;
-    public bool IsSlaveConnected
+    private string slaveConnectionState;
+    public string SlaveConnectionState
     {
-        get => isSlaveConnected;
-        set => this.RaiseAndSetIfChanged(ref isSlaveConnected, value);
+        get => slaveConnectionState;
+        set => this.RaiseAndSetIfChanged(ref slaveConnectionState, value);
     }
 
-    public IdleViewModel(WebSocketService socket)
+    public IdleViewModel(WebSocketHandler socketHandler)
     {
-        socket.OnClientConnected += OnSlaveConnection;
-        socket.OnClientDisconnected += OnSlaveDisconnection;
+        slaveConnectionState = "RETRYING";
+
+        socketHandler.wsService.OnClientConnected += OnSlaveConnection;
+        socketHandler.wsService.OnClientDisconnected += OnSlaveRetry;
+        socketHandler.OnClientEndRetry += OnSlaveDisconnection;
     }
 
     private void OnSlaveConnection()
     {
         Console.WriteLine("Slave just connected");
-        IsSlaveConnected = true;
+        SlaveConnectionState = "CONNECTED";
+    }
+
+    private void OnSlaveRetry(int retry)
+    {
+        Console.WriteLine("Slave trying to reconnect");
+        SlaveConnectionState = "RETRYING";
     }
 
     private void OnSlaveDisconnection()
     {
         Console.WriteLine("Slave just disconnected");
-        IsSlaveConnected = false;
+        SlaveConnectionState = "DISCONNECTED";
     }
 }

@@ -11,10 +11,19 @@
         Background="#EBEBEB">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <ContentControl Content="{Binding CurrentView}" />
+    <Grid>
+        <Grid ZIndex="1" IsVisible="{Binding ModalHandler.IsPopupVisible}">
+            <Border Background="black" ZIndex="1" Opacity="0.7"/>
+            <StackPanel Width="700" Height="180" ZIndex="2" Background="white">
+                <TextBlock Text="{Binding ModalHandler.TitleText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="55" FontWeight="SemiBold" Margin="0,20,0,20"/>
+                <TextBlock Text="{Binding ModalHandler.ContentText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30" FontWeight="SemiBold" Margin="0,20,0,20"/>
+            </StackPanel>
+        </Grid>
+        <ContentControl Content="{Binding CurrentView}"/>
+    </Grid>
+
+
 </Window>

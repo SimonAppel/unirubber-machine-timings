@@ -1,9 +1,8 @@
 # TODO LIST
-- Make a FSM of both Master & Slave
 
 ## TODO in General
+
 - Be able to send messages between master and slave
-    - Master should recognize the slave to send and receive messages
     - Messages Master to Slave
         - INIT: WHEN SENDING AMOUNT OF PIECES TO START WORKING TO SLAVES
         - ACK: WHEN A SLAVE MESSAGE IS RECEIVED (VERIFY IF NEEDED)
@@ -14,7 +13,6 @@
         - MALFUNCTION / ABORT
         - PIECES: MESSAGE CONTAINING UPDATE OF ITS STATE TO MASTER
 
-- When a slave is dis/connected, master should indicate it with a pop-up
 - Every node should have a local log
     - Master should point:
         - Slave connections
@@ -28,6 +26,7 @@
         - Timers when pieces are finished/Aborted/malfunction
         - Connections
         - Crashes and the machine state
+
 - Every node should persist in JSON
     - Master node should persist
         - IDs of the orders to match
@@ -35,16 +34,18 @@
     - Slave node should persist
         - ID of the orders to match, in case of consensus problem, the slave has always the correct value
         - The specific state of the order
+
 - The master node should connect to the cloud and send the data whenver it finishes.
+
 - All nodes should have open the SSH port using a SHA password
-- A Kibana/Grafana Dashboard should be displayed
+
+- A Grafana Dashboard should be displayed
+
 - Master should be able to read via keyboard the ID and then the content of the order
     - That data should be parsed into orders for the different machines to select
 
-
-## TODO in Master
-- Sample Text
-
-
-## TODO in Slave
-- Sample Text
+## DONE
+- When a slave is dis/connected, master should indicate it with a pop-up
+- Make a FSM of both Master & Slave
+- Be able to send messages between master and slave
+    - Master should recognize the slave to send and receive messages

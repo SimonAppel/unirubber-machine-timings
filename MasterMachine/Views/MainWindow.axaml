@@ -15,28 +15,41 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <StackPanel Margin="0,0,0,25">
-            <TextBlock Text="Send pieces amount to slave N1" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
-            <StackPanel Orientation="Horizontal">
-                <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[1]}"/>
-                <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="1" Width="100" Height="40" />
+    <Grid>
+        <Grid ZIndex="1" IsVisible="{Binding ModalHandler.IsPopupVisible}">
+            <Border Background="black" ZIndex="1" Opacity="0.7"/>
+            <StackPanel Width="700" Height="180" ZIndex="2" Background="white">
+                <TextBlock Text="{Binding ModalHandler.TitleText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="40" FontWeight="SemiBold" Margin="0,20,0,20"/>
+                <TextBlock Text="{Binding ModalHandler.ContentText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30" FontWeight="SemiBold" Margin="0,20,0,20"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Margin="0,0,0,25">
+                <TextBlock Text="Send pieces amount to slave N1" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[1]}"/>
+                    <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="1" Width="100" Height="40" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,0,0,25">
+                <TextBlock Text="Send pieces amount to slave N2" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[2]}"/>
+                    <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="2" Width="100" Height="40" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,0,0,25">
+                <TextBlock Text="Send pieces amount to slave N3" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[3]}"/>
+                    <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="3" Width="100" Height="40" />
+                </StackPanel>
             </StackPanel>
         </StackPanel>
-        <StackPanel Margin="0,0,0,25">
-            <TextBlock Text="Send pieces amount to slave N2" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
-            <StackPanel Orientation="Horizontal">
-                <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[2]}"/>
-                <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="2" Width="100" Height="40" />
-            </StackPanel>
-        </StackPanel>
-        <StackPanel Margin="0,0,0,25">
-            <TextBlock Text="Send pieces amount to slave N3" HorizontalAlignment="Left" VerticalAlignment="Center"/>        
-            <StackPanel Orientation="Horizontal">
-                <TextBox Watermark="Nº of pieces" Text="{Binding Path=Messages[3]}"/>
-                <Button Content="Initiate" Command="{Binding SendMessage}" CommandParameter="3" Width="100" Height="40" />
-            </StackPanel>
-        </StackPanel>
+    </Grid>
+
+    
 <!--
         <TextBlock Text="Send pieces amount to slave N1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button Content="Initiate work on N1" Command="{Binding SendCommand}" Width="100" Height="40" />
@@ -52,7 +65,7 @@
 -->
 
         
-    </StackPanel>
+    
 
     
 </Window>

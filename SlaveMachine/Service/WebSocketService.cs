@@ -14,7 +14,7 @@ public class WebSocketService
     public ClientWebSocket webSocket;
     public event Action<string>? MessageReceived;
     public event Action? OnClientConnected;
-    public event Action? OnClientDisconnected;
+    public event Action<int>? OnClientDisconnected;
 
     public WebSocketService()
     {
@@ -49,7 +49,7 @@ public class WebSocketService
         }
     }
 
-    public async Task ConnectAsync()
+    public async Task ConnectAsync(int? retry)
     {
         if (webSocket == null)
         {
@@ -64,12 +64,13 @@ public class WebSocketService
                 new Uri($"{wsServerAddr}?slaveId={slaveId}"),
                 CancellationToken.None
             );
+
             OnClientConnected?.Invoke();
         }
         catch (WebSocketException se)
         {
             Console.WriteLine($"WebSocket Service had the following error: {se.Message}");
-            OnClientDisconnected?.Invoke();
+            OnClientDisconnected?.Invoke((int)retry);
             throw;
         }
         catch (Exception e)
@@ -78,7 +79,7 @@ public class WebSocketService
                 $"WebSocket Service had the following non-socket-related error: {e.Message}"
             );
 
-            OnClientDisconnected?.Invoke();
+            OnClientDisconnected?.Invoke((int)retry);
             throw;
         }
     }
